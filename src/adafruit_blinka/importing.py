@@ -42,12 +42,13 @@ def raise_for_missing_platform_dependency(error: ModuleNotFoundError):
     install_command = None
     if sys.implementation.name == "cpython":
         from adafruit_blinka.platform_dependencies import (
+            format_install_command,
             get_platform_requirement_for_import,
         )
 
         requirement = get_platform_requirement_for_import(detector, error.name)
         if requirement is not None:
-            install_command = f"pip install {requirement}"
+            install_command = format_install_command([requirement])
     if install_command is None:
         install_command = PLATFORM_DEPENDENCY_INSTALLS.get(error.name)
     if install_command is None:

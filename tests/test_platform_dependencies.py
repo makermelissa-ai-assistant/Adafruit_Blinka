@@ -69,6 +69,14 @@ def test_earlier_raspberry_pi_does_not_install_lgpio():
     ]
 
 
+def test_unrelated_generic_linux_board_does_not_install_lgpio():
+    dependencies = platform_dependencies.get_platform_dependencies(
+        _detector(chip_id="GENERIC_X86"), python_version=(3, 14)
+    )
+
+    assert dependencies == []
+
+
 def test_import_requirement_uses_detected_python_version():
     detector = _detector(any_raspberry_pi_5_board=True, any_raspberry_pi=True)
 
@@ -132,3 +140,11 @@ def test_installer_skips_prompt_without_terminal(monkeypatch):
 
     assert installed is False
     assert not prompted
+
+
+def test_install_command_quotes_requirements_and_interpreter_paths():
+    command = platform_dependencies.format_install_command(
+        ["lgpio>=0.2.2.0"], executable="/path with spaces/python"
+    )
+
+    assert command == "'/path with spaces/python' -m pip install 'lgpio>=0.2.2.0'"

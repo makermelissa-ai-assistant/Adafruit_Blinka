@@ -6,6 +6,7 @@
 
 import importlib
 import importlib.util
+import shlex
 import subprocess
 import sys
 
@@ -15,6 +16,9 @@ def get_platform_dependencies(detector, python_version=None):
     if python_version is None:
         python_version = sys.version_info[:2]
 
+    # BCM2712 is currently the only Blinka microcontroller backend that imports
+    # generic_linux.lgpio_pin or generic_linux.lgpio_pwmout. Keep lgpio scoped
+    # to that backend rather than installing it for Raspberry Pi generally.
     if detector.board.any_raspberry_pi_5_board:
         lgpio_requirement = (
             "adafruit-lgpio>=0.2.2.0" if python_version >= (3, 13) else "lgpio>=0.2.2.0"
@@ -71,6 +75,15 @@ def get_platform_requirement_for_import(detector, import_name, python_version=No
     return None
 
 
+def format_install_command(requirements, executable="pip"):
+    """Return a shell-safe command for installing pip requirements."""
+    if executable == "pip":
+        command = [executable, "install", *requirements]
+    else:
+        command = [executable, "-m", "pip", "install", *requirements]
+    return shlex.join(command)
+
+
 def install_missing_platform_dependencies(
     detector, python_version=None, input_func=input
 ):
@@ -103,7 +116,7 @@ def install_missing_platform_dependencies(
     try:
         subprocess.run(command, check=True)
     except (OSError, subprocess.CalledProcessError) as error:
-        install_command = " ".join(command)
+        install_command = shlex.join(command)
         raise RuntimeError(
             f"Unable to install the platform dependencies. Try: {install_command}"
         ) from error

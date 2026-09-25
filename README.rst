@@ -55,6 +55,11 @@ install the packages needed by the detected board into the current Python
 environment. In non-interactive environments, the existing import error includes
 the command needed to install the missing platform package.
 
+``lgpio`` is installed only for boards whose selected GPIO or PWM backend uses
+Blinka's ``lgpio_pin.py`` or ``lgpio_pwmout.py`` implementation. Currently that
+is limited to BCM2712-based Raspberry Pi 5 boards; earlier Raspberry Pis use
+``RPi.GPIO`` instead.
+
 Installing from PyPI
 =====================
 
